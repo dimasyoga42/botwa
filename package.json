@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.12",
+    "baileys": "^6.7.12",
+    "nodemon": "^3.1.9",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "name": "bot",
+  "version": "1.0.0",
+  "main": "bot.js",
+  "scripts": {
+    "dev": "nodemon bot.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": ""
+}
