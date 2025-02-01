@@ -68,6 +68,7 @@ async function reconnectBot() {
     await startBot();
   } catch (error) {
     console.error("Gagal menyambung kembali. Coba lagi nanti.", error);
+    process.exit(1);  // Keluar jika gagal terus-menerus
   }
 }
 
