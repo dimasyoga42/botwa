@@ -7,6 +7,8 @@ const qrcode = require("qrcode-terminal");
 const fs = require("fs");
 
 let isConnected = false; // Flag untuk cek status koneksi
+let retryCount = 0;
+const maxRetries = 5; // Maksimal percobaan ulang
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("./auth_info");
@@ -30,6 +32,11 @@ async function startBot() {
       if (!isConnected) {
         console.log("✅ Bot terhubung!");
         isConnected = true; // Set status koneksi ke true
+
+        // Logika keep-alive untuk menjaga koneksi tetap hidup
+        setInterval(() => {
+          sock.sendMessage("status", { text: "Bot tetap aktif" });  // Mengirim pesan untuk menjaga koneksi
+        }, 10000); // Kirim pesan setiap 10 detik untuk menjaga koneksi tetap hidup
       }
     } else if (connection === "close") {
       console.log("⚠ Koneksi terputus. Mencoba menyambung kembali...");
@@ -48,7 +55,7 @@ async function startBot() {
 
     if (text.toLowerCase() === "menu") {
       await sock.sendMessage(sender, {
-        image: fs.readFileSync("./𝙀𝙡𝙖𝙞𝙣𝙖 𝙄𝙘𝙤𝙣.jpeg"),
+        image: fs.readFileSync("./𝙀𝙡𝙖𝙞𝙣𝙖 𝙄𝙄𝙘𝙤𝙣.jpeg"),
         caption: "1. toram\n2. Info\n3. Bantuan",
       });
     } else if (text.toLowerCase() === "toram") {
@@ -67,18 +74,18 @@ async function startBot() {
 
 // Fungsi untuk mencoba menyambung kembali
 async function reconnectBot() {
-  if (!isConnected) {
+  if (retryCount < maxRetries) {
     try {
-      console.log("Menunggu 5 detik sebelum mencoba lagi...");
-      // Menunggu beberapa detik sebelum mencoba lagi
+      retryCount++;
+      console.log(`Menunggu 5 detik sebelum mencoba lagi... Coba ke-${retryCount}`);
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await startBot(); // Mulai ulang bot hanya jika terputus
     } catch (error) {
       console.error("Gagal menyambung kembali. Coba lagi nanti.", error);
-      process.exit(1);  // Keluar jika gagal terus-menerus
     }
   } else {
-    console.log("Bot sudah terhubung, tidak perlu mencoba lagi.");
+    console.error("Gagal terhubung setelah beberapa percobaan. Bot dihentikan.");
+    process.exit(1); // Keluar setelah percobaan gagal terlalu banyak
   }
 }
 
