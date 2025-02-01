@@ -8,7 +8,7 @@ const fs = require("fs");
 
 let isConnected = false; // Flag untuk cek status koneksi
 let retryCount = 0;
-const maxRetries = 5; // Maksimal percobaan ulang
+//const maxRetries = 5; // Maksimal percobaan ulang
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("./auth_info");
