@@ -6,6 +6,8 @@ const {
 const qrcode = require("qrcode-terminal");
 const fs = require("fs");
 
+let isConnected = false; // Flag untuk cek status koneksi
+
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("./auth_info");
   const { version } = await fetchLatestBaileysVersion();
@@ -25,9 +27,13 @@ async function startBot() {
     }
 
     if (connection === "open") {
-      console.log("✅ Bot terhubung!");
+      if (!isConnected) {
+        console.log("✅ Bot terhubung!");
+        isConnected = true; // Set status koneksi ke true
+      }
     } else if (connection === "close") {
       console.log("⚠ Koneksi terputus. Mencoba menyambung kembali...");
+      isConnected = false; // Set status koneksi ke false jika terputus
       await reconnectBot();
     }
   });
@@ -61,14 +67,18 @@ async function startBot() {
 
 // Fungsi untuk mencoba menyambung kembali
 async function reconnectBot() {
-  try {
-    console.log("Menunggu 5 detik sebelum mencoba lagi...");
-    // Menunggu beberapa detik sebelum mencoba lagi
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    await startBot();
-  } catch (error) {
-    console.error("Gagal menyambung kembali. Coba lagi nanti.", error);
-    process.exit(1);  // Keluar jika gagal terus-menerus
+  if (!isConnected) {
+    try {
+      console.log("Menunggu 5 detik sebelum mencoba lagi...");
+      // Menunggu beberapa detik sebelum mencoba lagi
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await startBot(); // Mulai ulang bot hanya jika terputus
+    } catch (error) {
+      console.error("Gagal menyambung kembali. Coba lagi nanti.", error);
+      process.exit(1);  // Keluar jika gagal terus-menerus
+    }
+  } else {
+    console.log("Bot sudah terhubung, tidak perlu mencoba lagi.");
   }
 }
 
